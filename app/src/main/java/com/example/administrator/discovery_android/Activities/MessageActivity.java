@@ -79,7 +79,6 @@ public class MessageActivity extends AppCompatActivity{
                     if (NetworkUtil.isNetworkAvailable(MessageActivity.this)){
                         if (!es.isShutdown()){
                             es.execute(postEvent);
-                            System.out.println(postEvent);
                             c.await(2000, TimeUnit.MILLISECONDS);
                             if (postEvent.isSuccessful()){
                                 Toast.makeText(MessageActivity.this, "上传成功", Toast.LENGTH_LONG).show();

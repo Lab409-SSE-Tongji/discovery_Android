@@ -11,8 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class GetEvent implements Callable{
+public class Login implements Callable{
     private boolean isSuccessful = false;
+    private String username;
+    private String password;
+
+    public Login(String username, String password){
+        this.username = username;
+        this.password = password;
+    }
 
     @Override
     public Object call(){
@@ -20,7 +27,7 @@ public class GetEvent implements Callable{
         BufferedReader in;
         StringBuilder sb = new StringBuilder();
         try {
-            URL url = new URL(FinalStrings.HOST + "/events");
+            URL url = new URL(FinalStrings.HOST + "/accounts/?name=" + username + "&pwd=" + password);
             connection = (HttpURLConnection) url.openConnection();
 
             connection.setRequestProperty("accept", "*/*");

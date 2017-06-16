@@ -121,7 +121,8 @@ public class MainActivity extends AppCompatActivity{
     private void fresh(){
         List<Marker> mapScreenMarkers = aMap.getMapScreenMarkers();
         for (Marker i : mapScreenMarkers){
-            if (idSet.contains(i.getObject().toString())){
+            String tmp = (String)i.getObject();
+            if (idSet.contains(tmp)){
                 i.remove();
             }
         }
