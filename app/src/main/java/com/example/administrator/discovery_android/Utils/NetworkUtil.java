@@ -1,10 +1,8 @@
-package com.example.administrator.discovery_android;
+package com.example.administrator.discovery_android.Utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
 
 /**
  用于检测网络状态

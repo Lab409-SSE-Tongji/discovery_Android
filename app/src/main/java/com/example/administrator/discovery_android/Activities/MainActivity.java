@@ -1,7 +1,8 @@
-package com.example.administrator.discovery_android;
+package com.example.administrator.discovery_android.Activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -14,6 +15,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -22,17 +24,32 @@ import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.animation.Animation;
 import com.amap.api.maps.model.animation.TranslateAnimation;
+import com.example.administrator.discovery_android.Connections.GetEvent;
+import com.example.administrator.discovery_android.R;
+import com.example.administrator.discovery_android.Utils.NetworkUtil;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -49,6 +66,11 @@ public class MainActivity extends AppCompatActivity{
     private String path;
     private double lat;
     private double lng;
+    private Set<String> idSet = new HashSet<>();
+
+    private ExecutorService es = new ThreadPoolExecutor(3, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(10));
+
+    private GetEvent getEvent = new GetEvent();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,14 +89,15 @@ public class MainActivity extends AppCompatActivity{
         // 设置定位监听
         locationClient.setLocationListener(locationListener);
 
-        // 图片存储路径
-        path = Environment.getExternalStorageDirectory().getPath()
-                + "/Discovery" + SDF.format(new Date()) + ".png";
-
         ImageButton imageButton = (ImageButton) findViewById(R.id.snap) ;
+        final ImageButton freshButton = (ImageButton) findViewById(R.id.fresh) ;
+
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // 图片存储路径
+                path = Environment.getExternalStorageDirectory().getPath()
+                        + "/Discovery" + SDF.format(new Date()) + ".png";
                 // 打开编辑界面
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 Uri uri = Uri.fromFile(new File(path));
@@ -82,7 +105,78 @@ public class MainActivity extends AppCompatActivity{
                 startActivityForResult(intent, REQUEST);
             }
         });
+
+        freshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fresh();
+            }
+        });
+
         startLocation();
+
+        fresh();
+    }
+
+    private void fresh(){
+        List<Marker> mapScreenMarkers = aMap.getMapScreenMarkers();
+        for (Marker i : mapScreenMarkers){
+            if (idSet.contains(i.getObject().toString())){
+                i.remove();
+            }
+        }
+        try{
+            if (NetworkUtil.isNetworkAvailable(MainActivity.this)) {
+                if (!es.isShutdown()) {
+                    Future getEventFuture = es.submit(getEvent);
+                    JSONObject jb = new JSONObject(getEventFuture.get().toString());
+                    JSONArray arr = (JSONArray)jb.get("data");
+                    for (int i = 0; i < arr.length(); i++){
+                        JSONObject tmp = (JSONObject)arr.get(i);
+                        int id = tmp.getInt("eventId");
+                        double x = tmp.getDouble("positionX");
+                        double y = tmp.getDouble("positionY");
+                        String title = tmp.getString("title");
+                        String type = tmp.getString("type");
+                        LatLng latLng = new LatLng(x, y);
+                        MarkerOptions options = new MarkerOptions().position(latLng).snippet(title);
+
+                        switch (type){
+                            case "speech":
+                                options.title("speech");
+                                options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.issue)));
+                                break;
+                            case "new":
+                                options.title("new");
+                                options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.issue)));
+                                break;
+                            case "performance":
+                                options.title("performance");
+                                options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.issue)));
+                                break;
+                            case "novelty":
+                                options.title("novelty");
+                                options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.fun)));
+                                break;
+                            case "bargain":
+                                options.title("bargain");
+                                options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.fun)));
+                                break;
+                            default:
+                                options.title("others");
+                                options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.others)));
+                        }
+                        Marker marker = aMap.addMarker(options);
+                        marker.setObject(String.valueOf(id));
+                        idSet.add(String.valueOf(id));
+                    }
+                }
+            }else {
+                Toast.makeText(MainActivity.this, "网络连接不可用", Toast.LENGTH_LONG).show();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private AMapLocationClientOption getDefaultOption(){

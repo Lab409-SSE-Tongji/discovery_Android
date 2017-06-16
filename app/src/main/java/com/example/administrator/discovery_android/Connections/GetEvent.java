@@ -1,4 +1,6 @@
-package com.example.administrator.discovery_android;
+package com.example.administrator.discovery_android.Connections;
+
+import com.example.administrator.discovery_android.FinalStrings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,20 +9,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
-/**
- * Created by Administrator on 2017/6/11.
- */
-
-public class GetEvent implements Runnable{
+public class GetEvent implements Callable{
     private boolean isSuccessful = false;
 
     @Override
-    public void run(){
+    public Object call(){
         HttpURLConnection connection;
         BufferedReader in;
+        StringBuilder sb = new StringBuilder();
+        Object o = new Object();
         try {
-            URL url = new URL("http://192.168.1.102:8080/events?eventId=1");
+            URL url = new URL(FinalStrings.HOST + "/events");
             connection = (HttpURLConnection) url.openConnection();
 
             connection.setRequestProperty("accept", "*/*");
@@ -40,13 +41,14 @@ public class GetEvent implements Runnable{
             //返回成功码200则解析
             if(connection.getResponseCode() == 200){
                 while ((line = in.readLine()) != null){
-                    System.out.println(line);
+                    sb.append(line);
                     isSuccessful = true;
                 }
             }
         }catch (IOException e){
             e.printStackTrace();
         }
+        return sb;
     }
 
     public boolean isSuccessful() {

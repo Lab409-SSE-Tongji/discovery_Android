@@ -1,4 +1,4 @@
-package com.example.administrator.discovery_android;
+package com.example.administrator.discovery_android.Activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +15,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.administrator.discovery_android.Connections.PostEvent;
+import com.example.administrator.discovery_android.R;
+import com.example.administrator.discovery_android.Utils.NetworkUtil;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -27,9 +31,10 @@ public class MessageActivity extends AppCompatActivity{
     private final CountDownLatch c = new CountDownLatch(1);
     private final ExecutorService es = new ThreadPoolExecutor(3, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(10));
 
-    private EditText textField;
+    private EditText contentField;
+    private EditText titleField;
     private Bitmap bitmap;
-    private PostEvent p;
+    private PostEvent postEvent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +44,8 @@ public class MessageActivity extends AppCompatActivity{
         ImageView imageView = (ImageView) findViewById(R.id.showPic);
         ImageButton yes = (ImageButton) findViewById(R.id.yes);
         ImageButton no = (ImageButton) findViewById(R.id.no);
-        textField = (EditText) findViewById(R.id.text);
+        contentField = (EditText) findViewById(R.id.content);
+        titleField = (EditText) findViewById(R.id.eTitle);
 
         // 获取绑定的uri数据
         Bundle bundle = MessageActivity.this.getIntent().getExtras();
@@ -65,15 +71,17 @@ public class MessageActivity extends AppCompatActivity{
             public void onClick(View view) {
 //                Intent intent = new Intent(MessageActivity.this, MainActivity.class);
 //                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                final String text = textField.getText().toString();
+                final String content = contentField.getText().toString();
+                final String title = titleField.getText().toString();
 
-                p = new PostEvent(lat, lng, text, 21, c);
+                postEvent = new PostEvent(lat, lng, content, 21, title, "wa", c);
                 try {
                     if (NetworkUtil.isNetworkAvailable(MessageActivity.this)){
                         if (!es.isShutdown()){
-                            es.execute(p);
-                            c.await();
-                            if (p.isSuccessful()){
+                            es.execute(postEvent);
+                            System.out.println(postEvent);
+                            c.await(2000, TimeUnit.MILLISECONDS);
+                            if (postEvent.isSuccessful()){
                                 Toast.makeText(MessageActivity.this, "上传成功", Toast.LENGTH_LONG).show();
                                 es.shutdown();
                                 finish();

@@ -35,9 +35,18 @@
         android:contentDescription="@string/app_name" />
 
     <EditText
-        android:id="@+id/text"
+        android:id="@+id/eTitle"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:contentDescription="@string/app_name"
+        android:inputType="text"
+        android:labelFor="@id/eTitle" />
+
+    <EditText
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/app_name"
-        android:inputType="text" />
+        android:inputType="text"
+        android:labelFor="@id/content"/>
 </LinearLayout>

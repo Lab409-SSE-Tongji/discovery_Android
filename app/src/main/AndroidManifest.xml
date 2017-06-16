@@ -39,7 +39,7 @@
 
         </service>
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".Activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -47,7 +47,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MessageActivity">
+        <activity android:name=".Activities.MessageActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

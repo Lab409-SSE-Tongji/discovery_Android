@@ -1,4 +1,6 @@
-package com.example.administrator.discovery_android;
+package com.example.administrator.discovery_android.Connections;
+
+import com.example.administrator.discovery_android.FinalStrings;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,23 +13,23 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * Created by Administrator on 2017/6/11.
- */
-
-class PostEvent implements Runnable{
+public class PostEvent implements Runnable{
     private double x;
     private double y;
     private String content;
     private int id;
+    private String type;
+    private String title;
     private boolean isSuccessful = false;
     private CountDownLatch c;
 
-    PostEvent(double x, double y, String content, int id, CountDownLatch c){
+    public PostEvent(double x, double y, String content, int id, String type, String title, CountDownLatch c){
         this.x = x;
         this.y = y;
         this.content = content;
         this.id = id;
+        this.type = type;
+        this.title = title;
         this.c = c;
     }
 
@@ -38,13 +40,15 @@ class PostEvent implements Runnable{
         BufferedReader in;
 
         try {
-            URL url = new URL("http://192.168.1.102:8080/events");
+            URL url = new URL(FinalStrings.HOST + "/events");
             connection = (HttpURLConnection) url.openConnection();
 
             connection.setRequestMethod("POST");
             connection.setRequestProperty("connection", "Keep-Alive");
             connection.setRequestProperty("content-type", "application/json");
             connection.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36");
+
+            connection.setConnectTimeout(5000);
 
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -54,6 +58,8 @@ class PostEvent implements Runnable{
             jb.put("positionY", y);
             jb.put("content", content);
             jb.put("studentId", id);
+            jb.put("type", type);
+            jb.put("title", title);
 
             out = new PrintWriter(connection.getOutputStream());
             out.print(jb);
@@ -76,7 +82,7 @@ class PostEvent implements Runnable{
         }
     }
 
-    boolean isSuccessful() {
+    public boolean isSuccessful() {
         return isSuccessful;
     }
 }
