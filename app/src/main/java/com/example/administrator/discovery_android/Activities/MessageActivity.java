@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -17,8 +18,12 @@ import android.widget.Toast;
 
 import com.example.administrator.discovery_android.Connections.PostEvent;
 import com.example.administrator.discovery_android.R;
+import com.example.administrator.discovery_android.Utils.ImageCompressUtil;
 import com.example.administrator.discovery_android.Utils.NetworkUtil;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -73,8 +78,10 @@ public class MessageActivity extends AppCompatActivity{
 //                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 final String content = contentField.getText().toString();
                 final String title = titleField.getText().toString();
-
-                postEvent = new PostEvent(lat, lng, content, 21, title, "wa", c);
+                ByteArrayOutputStream baos;
+                baos = ImageCompressUtil.compressImage(bitmap);
+                String path = RandomStringUtils.randomAlphabetic(20) + ".png";
+                postEvent = new PostEvent(lat, lng, content, 21, title, "wa", Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT), path, c);
                 try {
                     if (NetworkUtil.isNetworkAvailable(MessageActivity.this)){
                         if (!es.isShutdown()){

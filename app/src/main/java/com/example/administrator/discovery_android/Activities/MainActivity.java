@@ -240,6 +240,11 @@ public class MainActivity extends AppCompatActivity{
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
+        }else {
+            Toast.makeText(MainActivity.this, "未能读取到图片，请重试", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
     }
 

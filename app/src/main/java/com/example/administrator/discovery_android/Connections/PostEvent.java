@@ -2,11 +2,17 @@ package com.example.administrator.discovery_android.Connections;
 
 import com.example.administrator.discovery_android.FinalStrings;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -20,16 +26,20 @@ public class PostEvent implements Runnable{
     private int id;
     private String type;
     private String title;
+    private String file;
+    private String path;
     private boolean isSuccessful = false;
     private CountDownLatch c;
 
-    public PostEvent(double x, double y, String content, int id, String type, String title, CountDownLatch c){
+    public PostEvent(double x, double y, String content, int id, String type, String title, String file, String path, CountDownLatch c){
         this.x = x;
         this.y = y;
         this.content = content;
         this.id = id;
         this.type = type;
         this.title = title;
+        this.file = file;
+        this.path = path;
         this.c = c;
     }
 
@@ -37,7 +47,9 @@ public class PostEvent implements Runnable{
     public void run(){
         HttpURLConnection connection;
         PrintWriter out;
-        BufferedReader in;
+        String end = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "******";
 
         try {
             URL url = new URL(FinalStrings.HOST + "/events");
@@ -60,22 +72,16 @@ public class PostEvent implements Runnable{
             jb.put("studentId", id);
             jb.put("type", type);
             jb.put("title", title);
+            jb.put("picPath", path);
+            jb.put("file", file);
 
             out = new PrintWriter(connection.getOutputStream());
             out.print(jb);
             out.flush();
 
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-
-            //返回成功码200则解析
-            if(connection.getResponseCode() == 200){
-                while ((line = in.readLine()) != null){
-                    System.out.println(line);
-                    isSuccessful = true;
-                }
+            if (connection.getResponseCode() == 200){
+                isSuccessful = true;
             }
-
             c.countDown();
         }catch (IOException | JSONException e){
             e.printStackTrace();
