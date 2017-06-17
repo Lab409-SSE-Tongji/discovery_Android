@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.example.administrator.discovery_android.Connections.PostEvent;
 import com.example.administrator.discovery_android.R;
-import com.example.administrator.discovery_android.Utils.ImageCompressUtil;
+import com.example.administrator.discovery_android.Utils.ImageCodingUtil;
 import com.example.administrator.discovery_android.Utils.NetworkUtil;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -79,7 +79,7 @@ public class MessageActivity extends AppCompatActivity{
                 final String content = contentField.getText().toString();
                 final String title = titleField.getText().toString();
                 ByteArrayOutputStream baos;
-                baos = ImageCompressUtil.compressImage(bitmap);
+                baos = ImageCodingUtil.compressImage(bitmap);
                 String path = RandomStringUtils.randomAlphabetic(20) + ".png";
                 postEvent = new PostEvent(lat, lng, content, 21, title, "wa", Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT), path, c);
                 try {

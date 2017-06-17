@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class RegisterActivities extends AppCompatActivity{
     private ExecutorService es = new ThreadPoolExecutor(3, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(10));
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

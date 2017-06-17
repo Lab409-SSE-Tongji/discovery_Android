@@ -7,13 +7,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class GetById implements Callable{
     private boolean isSuccessful = false;
     private int id;
+    private StringBuilder sb = new StringBuilder();
 
     public GetById(int id){
         this.id = id;
@@ -23,7 +22,6 @@ public class GetById implements Callable{
     public Object call(){
         HttpURLConnection connection;
         BufferedReader in;
-        Object o = new Object();
         try {
             URL url = new URL(FinalStrings.HOST + "/events/" + id);
             connection = (HttpURLConnection) url.openConnection();
@@ -33,27 +31,20 @@ public class GetById implements Callable{
 
             connection.connect();
 
-            Map<String, List<String>> map = connection.getHeaderFields();
-            // 遍历所有的响应头字段
-            for (String key : map.keySet()) {
-                System.out.println(key + "--->" + map.get(key));
-            }
-
             in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
 
             //返回成功码200则解析
             if(connection.getResponseCode() == 200){
                 while ((line = in.readLine()) != null){
-                    System.out.println(line);
-                    o = map;
+                    sb.append(line);
                     isSuccessful = true;
                 }
             }
         }catch (IOException e){
             e.printStackTrace();
         }
-        return o;
+        return sb.toString();
     }
 
     public boolean isSuccessful() {

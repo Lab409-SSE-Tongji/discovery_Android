@@ -1,11 +1,13 @@
 package com.example.administrator.discovery_android.Utils;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
-public class ImageCompressUtil {
+public class ImageCodingUtil {
     public static ByteArrayOutputStream compressImage(Bitmap image) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -27,5 +29,10 @@ public class ImageCompressUtil {
         baos.reset();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         return baos;
+    }
+
+    public static Bitmap getBitmapFromString(String str){
+        byte[] arr = Base64.decode(str, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(arr, 0, arr.length);
     }
 }

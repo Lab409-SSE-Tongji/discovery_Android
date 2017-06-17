@@ -51,7 +51,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-
 public class MainActivity extends AppCompatActivity{
     private static final int REQUEST = 1;
     private static final LatLng TJU = new LatLng(31.286054, 121.215252);
@@ -64,6 +63,7 @@ public class MainActivity extends AppCompatActivity{
     private Marker locMarker;
 
     private String path;
+    private int eventId = 0;
     private double lat;
     private double lng;
     private Set<String> idSet = new HashSet<>();
@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity{
 
         ImageButton imageButton = (ImageButton) findViewById(R.id.snap) ;
         final ImageButton freshButton = (ImageButton) findViewById(R.id.fresh) ;
+        final ImageButton detailButton = (ImageButton) findViewById(R.id.detail) ;
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +104,17 @@ public class MainActivity extends AppCompatActivity{
                 Uri uri = Uri.fromFile(new File(path));
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                 startActivityForResult(intent, REQUEST);
+            }
+        });
+
+        detailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (eventId != 0){
+                    Intent intent = new Intent(MainActivity.this, EventDetailActivity.class);
+                    intent.putExtra("id", eventId);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -168,7 +180,7 @@ public class MainActivity extends AppCompatActivity{
                                 options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.others)));
                         }
                         Marker marker = aMap.addMarker(options);
-                        marker.setObject(String.valueOf(id));
+                        marker.setObject(id);
                         idSet.add(String.valueOf(id));
                     }
                 }
@@ -178,6 +190,20 @@ public class MainActivity extends AppCompatActivity{
         }catch (Exception e){
             e.printStackTrace();
         }
+
+        // 定义 Marker 点击事件监听
+        AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+            // marker 对象被点击时回调的接口
+            // 返回 true 则表示接口已响应事件，否则返回false
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                eventId = (int) marker.getObject();
+                Toast.makeText(MainActivity.this, eventId, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        };
+        // 绑定 Marker 被点击事件
+        aMap.setOnMarkerClickListener(markerClickListener);
     }
 
     private AMapLocationClientOption getDefaultOption(){
@@ -237,13 +263,11 @@ public class MainActivity extends AppCompatActivity{
                 intent.putExtra("uri", path);
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
         }else {
             Toast.makeText(MainActivity.this, "未能读取到图片，请重试", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(MainActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }
     }
