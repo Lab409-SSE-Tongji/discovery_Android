@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity{
     private int eventId = 0;
     private double lat;
     private double lng;
-    private Set<String> idSet = new HashSet<>();
+    private Set<Integer> idSet = new HashSet<>();
 
     private ExecutorService es = new ThreadPoolExecutor(3, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(10));
 
@@ -133,7 +134,7 @@ public class MainActivity extends AppCompatActivity{
     private void fresh(){
         List<Marker> mapScreenMarkers = aMap.getMapScreenMarkers();
         for (Marker i : mapScreenMarkers){
-            String tmp = (String)i.getObject();
+            int tmp = (int)i.getObject();
             if (idSet.contains(tmp)){
                 i.remove();
             }
@@ -181,7 +182,7 @@ public class MainActivity extends AppCompatActivity{
                         }
                         Marker marker = aMap.addMarker(options);
                         marker.setObject(id);
-                        idSet.add(String.valueOf(id));
+                        idSet.add(id);
                     }
                 }
             }else {
@@ -198,8 +199,8 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public boolean onMarkerClick(Marker marker) {
                 eventId = (int) marker.getObject();
-                Toast.makeText(MainActivity.this, eventId, Toast.LENGTH_SHORT).show();
-                return false;
+                marker.showInfoWindow();
+                return true;
             }
         };
         // 绑定 Marker 被点击事件
@@ -242,6 +243,7 @@ public class MainActivity extends AppCompatActivity{
                     locMarker = aMap.addMarker(new MarkerOptions().position(latLng).title("你的位置").snippet("DefaultMarker"));
     //                    locMarker.setObject("loc");
                 }
+                locMarker.setObject(0);
             }
         }
     };
